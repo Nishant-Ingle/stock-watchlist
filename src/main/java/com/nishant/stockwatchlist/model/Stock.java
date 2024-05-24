@@ -26,5 +26,5 @@ public class Stock {
     // Name of the company
     private final String name;
 
-    private final double price;
+    private double price;
 }

@@ -27,13 +27,20 @@ public class WatchlistController {
         return ResponseEntity.ok(watchlistService.getWatchlist(watchlistId));
     }
 
+    /**
+     * Fetch list of stocks present in a watchlist.
+     */
     @GetMapping("/{watchlistId}/stocks")
     public ResponseEntity<List<Stock>> getWatchListStocks(@PathVariable UUID watchlistId) {
         List<Stock> watchlistStocks = watchlistService.getWatchlistStocks(watchlistId);
         return ResponseEntity.ok().body(watchlistStocks);
     }
 
-    @PostMapping()
+    /**
+     * Create watchlists, multiple calls with same payload will create multiple entries
+     * as POST method is not idempotent.
+     */
+    @PostMapping
     public ResponseEntity<List<UUID>> createWatchlists(@RequestBody List<Watchlist> watchlists) {
         List<UUID> watchlistIds = watchlistService.createWatchlists(watchlists);
         return ResponseEntity.status(HttpStatus.CREATED).body(watchlistIds);
@@ -49,7 +56,7 @@ public class WatchlistController {
     }
 
     @DeleteMapping("/{watchListId}/stocks")
-    public ResponseEntity<?> deleteStocksToWatchlist(
+    public ResponseEntity<?> deleteStocksFromWatchlist(
             @PathVariable UUID watchListId,
             @RequestBody List<String> stockSyms)
     {

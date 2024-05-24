@@ -33,7 +33,6 @@ public class WatchlistService {
         return stockService.getStocksFromSym(getWatchlist(watchlistId).getStockSyms());
     }
 
-
     public List<UUID> createWatchlists(List<Watchlist> watchlists) {
         watchlists = watchlistRepository.saveAll(watchlists);
 

@@ -17,7 +17,12 @@ public class StockController {
     @Autowired
     private StockService stockService;
 
-    @GetMapping()
+    /**
+     * Get list of stocks.
+     * @param search Search term which can either a substring of be symbol or company name.
+     * @return List of stocks.
+     */
+    @GetMapping
     public List<Stock> getStocks(@RequestParam(required = false) String search) {
         List<Stock> stocks = stockService.getStocks(search);
         return stocks;

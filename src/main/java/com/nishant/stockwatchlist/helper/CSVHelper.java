@@ -17,6 +17,12 @@ import java.util.UUID;
  */
 @Slf4j
 public class CSVHelper {
+
+    /**
+     * Reads the CSV file present at filePath and return list of Stock.
+     * @param filePath Path of the CSV file.
+     * @return List of stocks.
+     */
     public static List<Stock> getStockData(String filePath) {
         List<Stock> stocks = new ArrayList<>();
 
@@ -28,7 +34,8 @@ public class CSVHelper {
                 String companyName = nextLine[0].trim();
                 String symbol = nextLine[1].trim();
                 double price = Double.parseDouble(nextLine[2]);
-                Stock stock = Stock.of(symbol, companyName, price);
+                Stock stock = Stock.of(symbol, companyName);
+                stock.setPrice(price);
                 stocks.add(stock);
             }
         } catch (Exception exception) {
