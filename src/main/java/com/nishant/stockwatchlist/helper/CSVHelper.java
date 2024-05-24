@@ -28,7 +28,7 @@ public class CSVHelper {
                 String companyName = nextLine[0].trim();
                 String symbol = nextLine[1].trim();
                 double price = Double.parseDouble(nextLine[2]);
-                Stock stock = new Stock(UUID.randomUUID(), symbol, companyName, price);
+                Stock stock = Stock.of(symbol, companyName, price);
                 stocks.add(stock);
             }
         } catch (Exception exception) {

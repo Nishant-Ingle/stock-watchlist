@@ -2,28 +2,31 @@ package com.nishant.stockwatchlist.service;
 
 import com.nishant.stockwatchlist.model.Stock;
 import com.nishant.stockwatchlist.model.Watchlist;
+import com.nishant.stockwatchlist.repository.WatchlistRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Slf4j
 public class WatchlistService {
+    @Autowired
+    private WatchlistRepository watchlistRepository;
 
     @Autowired
-    StockService stockService;
-
-    private Map<UUID, Watchlist> watchlistMap = new HashMap<>();
+    private StockService stockService;
 
     public List<Watchlist> getWatchlists() {
-        return watchlistMap.values().stream().toList();
+        return watchlistRepository.findAll();
     }
 
     public Watchlist getWatchlist(UUID watchlistId) {
-        return watchlistMap.get(watchlistId);
+        return watchlistRepository.findWatchlistById(watchlistId);
     }
 
     public List<Stock> getWatchlistStocks(UUID watchlistId) {
@@ -32,29 +35,24 @@ public class WatchlistService {
 
 
     public List<UUID> createWatchlists(List<Watchlist> watchlists) {
-        List<UUID> addedWatchlists = new ArrayList<>();
+        watchlists = watchlistRepository.saveAll(watchlists);
 
-        for (Watchlist watchlist: watchlists) {
-            String name = watchlist.getName();
-            UUID owner = watchlist.getOwner();
-            List<String> stockSyms  = watchlist.getStockSyms();
-            UUID watchlistId = UUID.randomUUID();
-            watchlistMap.put(watchlistId, new Watchlist(watchlistId, name, owner, stockSyms));
-            addedWatchlists.add(watchlistId);
-        }
-
-        return addedWatchlists;
+        return watchlists.stream().map(Watchlist::getId).toList();
     }
 
     public void addStocks(UUID watchlistId, List<String> stocks) {
         log.info("Adding {} stocks to {}", stocks.size(), watchlistId);
-        watchlistMap.get(watchlistId).getStockSyms().addAll(stocks);
+        var watchlist = watchlistRepository.findWatchlistById(watchlistId);
+        watchlist.getStockSyms().addAll(stocks);
+        watchlistRepository.save(watchlist);
     }
 
     public void deleteStocks(UUID watchlistId, List<String> stockSym) {
         Set<String> stockSet = new HashSet<>(stockSym);
 
-        log.info("Deleting {} stocks to {}", stockSym.size(), watchlistId);
-        watchlistMap.get(watchlistId).getStockSyms().removeIf(stockSet::contains);
+        log.info("Deleting {} stocks from {}", stockSym.size(), watchlistId);
+        var watchlist = watchlistRepository.findWatchlistById(watchlistId);
+        watchlist.getStockSyms().removeIf(stockSet::contains);
+        watchlistRepository.save(watchlist);;
     }
 }
