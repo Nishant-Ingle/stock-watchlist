@@ -1,0 +1,16 @@
+1) Users can search for stocks by symbol or company name.
+GET /stocks?q=AAPL&by=symbol
+GET /stocks?q=Microsoft&by=name
+
+2) Users can add stocks to their watchlist.
+PATCH /watchlists/{watchlistId}/stocks
+
+3) The watchlist displays basic stock information for each added stock (e.g., symbol, company name, current price).
+GET /watchlists
+GET /watchlists/{watchlistId}/stocks
+
+4) Users can remove stocks from the watchlist.
+DELETE /watchlists/{watchlistId}/stocks/{stockId}
+
+5) Create watchlist
+POST /watchlists/
