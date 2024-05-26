@@ -8,9 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Helper class for reading CSV data from file.
@@ -23,8 +21,8 @@ public class CSVHelper {
      * @param filePath Path of the CSV file.
      * @return List of stocks.
      */
-    public static List<Stock> getStockData(String filePath) {
-        List<Stock> stocks = new ArrayList<>();
+    public static Set<Stock> getStockData(String filePath) {
+        Set<Stock> stocks = new HashSet<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(new ClassPathResource(filePath).getFile()))) {
             // Skip the header row

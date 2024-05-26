@@ -29,7 +29,7 @@ public class WatchlistService {
         return watchlistRepository.findWatchlistById(watchlistId);
     }
 
-    public List<Stock> getWatchlistStocks(UUID watchlistId) {
+    public Set<Stock> getWatchlistStocks(UUID watchlistId) {
         return stockService.getStocksFromSym(getWatchlist(watchlistId).getStockSyms());
     }
 
@@ -39,10 +39,22 @@ public class WatchlistService {
         return watchlists.stream().map(Watchlist::getId).toList();
     }
 
-    public void addStocks(UUID watchlistId, List<String> stocks) {
-        log.info("Adding {} stocks to {}", stocks.size(), watchlistId);
+    public void updateStocks(UUID watchlistId, List<String> stocks, boolean removeExistingStocks) {
+        log.info("Updating {} stocks for {} with remove existing {}.", stocks.size(), watchlistId, removeExistingStocks);
         var watchlist = watchlistRepository.findWatchlistById(watchlistId);
-        watchlist.getStockSyms().addAll(stocks);
+
+        if (removeExistingStocks) {
+            watchlist.setStockSyms(new HashSet<>());
+        }
+
+        Set<String> validStocks = stockService.getAllStockSyms();
+
+        for (String stock: stocks) {
+            if (validStocks.contains(stock)) {
+                watchlist.getStockSyms().add(stock);
+            }
+        }
+
         watchlistRepository.save(watchlist);
     }
 

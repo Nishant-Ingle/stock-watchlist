@@ -2,14 +2,14 @@ package com.nishant.stockwatchlist.controller;
 
 import com.nishant.stockwatchlist.model.Stock;
 import com.nishant.stockwatchlist.service.StockService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/stocks")
 public class StockController {
@@ -23,8 +23,10 @@ public class StockController {
      * @return List of stocks.
      */
     @GetMapping
-    public List<Stock> getStocks(@RequestParam(required = false) String search) {
-        List<Stock> stocks = stockService.getStocks(search);
+    public Set<Stock> getStocks(@RequestParam(required = false) String search) {
+        log.info("Received request to get stocks with search: {}.", search);
+        Set<Stock> stocks = stockService.getStocks(search);
+        log.info("Sending stocks of size: {}.", stocks.size());
         return stocks;
     }
 }

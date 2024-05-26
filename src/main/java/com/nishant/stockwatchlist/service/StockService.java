@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,7 +42,7 @@ public class StockService {
      */
     @PostConstruct
     public void setup() {
-        List<Stock> stocks = CSVHelper.getStockData("static/stock-data.csv");
+        Set<Stock> stocks = CSVHelper.getStockData("static/stock-data.csv");
 
         if (stockRepository.findAll().isEmpty()) {
             stockRepository.saveAll(stocks);
@@ -55,10 +57,12 @@ public class StockService {
             return;
         }
 
-        List<Stock> stocks = stockRepository.findAll();
+        Set<Stock> stocks = new HashSet<>(stockRepository.findAll());
 
         for (Stock stock: stocks) {
             String symbol = stock.getSymbol();
+
+            log.info("Fetching stock quotes from Alpha Vantage for symbol {}.", symbol);
 
             // FIXME: Store Api key securely than hardcoding.
             String response =
@@ -89,24 +93,33 @@ public class StockService {
      * @param search Search term which can either be a substring of company name or symbol.
      * @return List of stocks.
      */
-    public List<Stock> getStocks(String search) {
-        // Fetch prices using the stock data API.
-        updatePrices();
-
-        if (!StringUtils.isAllBlank(search)) {
-            final String searchLowerCase = search.toLowerCase();
-
-            return stockRepository.findAll()
-                           .stream()
-                           .filter(stock -> stock.getName().toLowerCase().contains(searchLowerCase) ||
-                                            stock.getSymbol().toLowerCase().contains(searchLowerCase))
-                           .toList();
+    public Set<Stock> getStocks(String search) {
+        if (StringUtils.isAllBlank(search)) {
+            return Set.of();
         }
-        return stockRepository.findAll();
+
+        final String searchLowerCase = search.toLowerCase();
+
+        return getAllStocks()
+                .stream()
+                .filter(stock -> stock.getName().toLowerCase().contains(searchLowerCase) ||
+                                 stock.getSymbol().toLowerCase().contains(searchLowerCase))
+                .collect(Collectors.toSet());
     }
 
-    public List<Stock> getStocksFromSym(List<String> stockSyms) {
+    public Set<Stock> getAllStocks() {
+        // Fetch prices using the stock data API.
         updatePrices();
-        return stockSyms.stream().map(sym -> stockRepository.findStockBySymbol(sym)).toList();
+        return new HashSet<>(stockRepository.findAll());
+    }
+
+    public Set<String> getAllStockSyms() {
+        return getAllStocks().stream().map(stock -> stock.getSymbol()).collect(Collectors.toSet());
+    }
+
+    public Set<Stock> getStocksFromSym(Set<String> stockSyms) {
+        // todo: update to refresh only for stockSyms
+        updatePrices();
+        return stockSyms.stream().map(sym -> stockRepository.findStockBySymbol(sym)).collect(Collectors.toSet());
     }
 }

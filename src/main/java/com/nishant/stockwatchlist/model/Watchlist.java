@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor(staticName="of")
 @Entity
 @Data
 public class Watchlist {
@@ -23,6 +23,7 @@ public class Watchlist {
     private final UUID owner;
 
     // todo change to uuid
+    @Setter
     @ElementCollection
-    private final List<String> stockSyms;
+    private Set<String> stockSyms;
 }

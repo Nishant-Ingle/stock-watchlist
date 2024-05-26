@@ -9,11 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/watchlists")
 public class WatchlistController {
+
     @Autowired
     private WatchlistService watchlistService;
 
@@ -31,8 +33,8 @@ public class WatchlistController {
      * Fetch list of stocks present in a watchlist.
      */
     @GetMapping("/{watchlistId}/stocks")
-    public ResponseEntity<List<Stock>> getWatchListStocks(@PathVariable UUID watchlistId) {
-        List<Stock> watchlistStocks = watchlistService.getWatchlistStocks(watchlistId);
+    public ResponseEntity<Set<Stock>> getWatchListStocks(@PathVariable UUID watchlistId) {
+        Set<Stock> watchlistStocks = watchlistService.getWatchlistStocks(watchlistId);
         return ResponseEntity.ok().body(watchlistStocks);
     }
 
@@ -46,12 +48,23 @@ public class WatchlistController {
         return ResponseEntity.status(HttpStatus.CREATED).body(watchlistIds);
     }
 
+    @PutMapping("/{watchListId}/stocks")
+    public ResponseEntity<?> updateStocksToWatchlist(
+            @PathVariable UUID watchListId,
+            @RequestBody List<String> stockSym)
+    {
+        // Remove existing stocks for PUT
+        watchlistService.updateStocks(watchListId, stockSym, true);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{watchListId}/stocks")
     public ResponseEntity<?> addStocksToWatchlist(
             @PathVariable UUID watchListId,
             @RequestBody List<String> stockSym)
     {
-        watchlistService.addStocks(watchListId, stockSym);
+        // Append new stocks for PATCH
+        watchlistService.updateStocks(watchListId, stockSym, false);
         return ResponseEntity.noContent().build();
     }
 
